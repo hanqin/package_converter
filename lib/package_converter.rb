@@ -13,17 +13,18 @@ class PackageConverter
 
     manifest.attributes["package"] = new_package_name
 
-    manifest.elements.each("application") do |element|
-      element.attributes["android:label"] = new_app_name unless new_app_name.nil?
-    end
+    update_app_name(manifest, new_app_name)
 
-    manifest.elements.each("application/activity") do |element|
-      p element
-      activity_name = element.attributes["android:name"]
-      element.attributes["android:name"] = activity_full_name(original_package, activity_name)
-      p element.attributes["android:name"]
-    end
+    update_activity_name(manifest, original_package)
 
+    update_src_to_use_new_r(new_package_name, original_package)
+
+    File.open(ANDROID_MANIFEST, "w") do |data|
+      data << xml
+    end
+  end
+
+  def self.update_src_to_use_new_r(new_package_name, original_package)
     Dir.glob ("src/**/*.java") do |file|
       text = File.read(file)
       text.gsub!("import #{original_package}.R;", "import #{new_package_name}.R;")
@@ -36,9 +37,20 @@ class PackageConverter
       text.gsub!("package #{original_package};", "package #{original_package};\r\nimport #{new_package_name}.R;")
       File.open(file, 'w') { |f| f.write(text) }
     end
+  end
 
-    File.open(ANDROID_MANIFEST, "w") do |data|
-      data << xml
+  def self.update_activity_name(manifest, original_package)
+    manifest.elements.each("application/activity") do |element|
+      p element
+      activity_name = element.attributes["android:name"]
+      element.attributes["android:name"] = activity_full_name(original_package, activity_name)
+      p element.attributes["android:name"]
+    end
+  end
+
+  def self.update_app_name(manifest, new_app_name)
+    manifest.elements.each("application") do |element|
+      element.attributes["android:label"] = new_app_name unless new_app_name.nil?
     end
   end
 

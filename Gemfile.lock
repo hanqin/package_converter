@@ -1,0 +1,16 @@
+PATH
+  remote: .
+  specs:
+    package_converter (0.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    rake (10.0.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  package_converter!
+  rake (~> 10.0.2)

@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+require 'package_converter'
+PackageConverter.convert(ARGV[0])

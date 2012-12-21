@@ -3,7 +3,7 @@ require 'rexml/document'
 class PackageConverter
   ANDROID_MANIFEST = "AndroidManifest.xml"
 
-  def self.convert (new_package_name)
+  def self.convert (new_package_name, new_app_name)
     raise "New package name should not be null or empty" if new_package_name.nil? || new_package_name.empty?
     raise "Cannot find the android manifest file" unless File.exist? ANDROID_MANIFEST
 
@@ -12,6 +12,10 @@ class PackageConverter
     original_package = manifest.attributes["package"]
 
     manifest.attributes["package"] = new_package_name
+
+    manifest.elements.each("application") do |element|
+      element.attributes["android:label"] = new_app_name unless new_app_name.nil?
+    end
 
     manifest.elements.each("application/activity") do |element|
       p element

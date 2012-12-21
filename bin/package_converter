@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
 
 require 'package_converter'
-PackageConverter.convert(ARGV[0])
+PackageConverter.convert(ARGV[0], ARGV[1])

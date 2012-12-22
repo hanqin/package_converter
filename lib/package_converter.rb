@@ -22,14 +22,34 @@ class PackageConverter
 
     manifest.attributes["package"] = new_package_name
 
-    update_app_name(manifest, new_app_name)
+    update_app_label(manifest, new_app_name)
+
+    update_application_name(manifest, original_package)
 
     update_activity_name(manifest, original_package)
+
+    update_layout_files_custom_name_space(new_package_name, original_package, dest_dir)
 
     update_src_to_use_new_r(new_package_name, original_package, dest_dir)
 
     File.open(target_manifest, "w") do |data|
       data << xml
+    end
+  end
+
+  def self.update_application_name(manifest, original_package)
+    manifest.elements.each("application") do |element|
+      attribute = element.attributes.get_attribute "android:name"
+      return if attribute.nil?
+      element.attributes["android:name"] = full_name(original_package, attribute.value)
+    end
+  end
+
+  def self.update_layout_files_custom_name_space(new_package_name, original_package, dest_dir)
+    Dir.glob ("#{dest_dir}/res/**/*.xml") do |file|
+      text = File.read(file)
+      text.gsub!("http://schemas.android.com/apk/res/#{original_package}", "http://schemas.android.com/apk/res/#{new_package_name}")
+      File.open(file, 'w') { |f| f.write(text) }
     end
   end
 
@@ -57,18 +77,23 @@ class PackageConverter
     manifest.elements.each("application/activity") do |element|
       p element
       activity_name = element.attributes["android:name"]
-      element.attributes["android:name"] = activity_full_name(original_package, activity_name)
+      element.attributes["android:name"] = full_name(original_package, activity_name)
       p element.attributes["android:name"]
     end
   end
 
-  def self.update_app_name(manifest, new_app_name)
+  def self.update_app_label(manifest, new_app_name)
     manifest.elements.each("application") do |element|
       element.attributes["android:label"] = new_app_name unless new_app_name.nil?
     end
   end
 
-  def self.activity_full_name (package, basename)
-    package + basename if basename.to_s.start_with? "."
+  def self.full_name(package, basename)
+    if basename.to_s.start_with? "." then
+      return package + basename
+    else
+      return basename
+    end
   end
+
 end

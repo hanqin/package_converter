@@ -1,14 +1,15 @@
-class PackageConvertWorker
+  require "android_constants"
 
+class PackageConvertWorker
   def initialize(new_app_name, new_package_name, dest_dir)
     @new_app_name = new_app_name
     @new_package_name = new_package_name
     @dest_dir = dest_dir
 
-    @target_manifest_file = "#@dest_dir/#{ANDROID_MANIFEST}"
+    @target_manifest_file = "#@dest_dir/#{AndroidConstants.android_manifest}"
 
     @xml = REXML::Document.new(File.read @target_manifest_file)
-    @manifest = xml.root
+    @manifest = @xml.root
     @original_package = @manifest.attributes["package"]
   end
 
@@ -26,7 +27,7 @@ class PackageConvertWorker
     update_src_to_use_new_r
 
     File.open(@target_manifest_file, "w") do |data|
-      data << xml
+      data << @xml
     end
   end
 
@@ -44,11 +45,6 @@ class PackageConvertWorker
       text.gsub!("http://schemas.android.com/apk/res/#@original_package", "http://schemas.android.com/apk/res/#@new_package_name")
       File.open(file, 'w') { |f| f.write(text) }
     end
-  end
-
-  def copy_files(src_dir, dest_dir)
-    FileUtils.rm_rf dest_dir
-    FileUtils.cp_r src_dir, dest_dir
   end
 
   def update_src_to_use_new_r()

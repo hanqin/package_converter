@@ -1,4 +1,4 @@
-  require "android_constants"
+require "android_constants"
 
 class PackageConvertWorker
   def initialize(new_app_name, new_package_name, dest_dir)

@@ -26,6 +26,8 @@ class PackageConvertWorker
 
     update_src_to_use_new_r
 
+    update_jni
+
     File.open(@target_manifest_file, "w") do |data|
       data << @xml
     end
@@ -58,17 +60,14 @@ class PackageConvertWorker
       text = File.read(file)
       next if text.include? "import #@new_package_name.R;"
       text.gsub!("package #@original_package;", "package #@original_package;\r\nimport #@new_package_name.R;")
-      p file
       File.open(file, 'w') { |f| f.write(text) }
     end
   end
 
   def update_activity_name()
     @manifest.elements.each("application/activity") do |element|
-      p element
       activity_name = element.attributes["android:name"]
       element.attributes["android:name"] = full_name(@original_package, activity_name)
-      p element.attributes["android:name"]
     end
   end
 
@@ -83,6 +82,17 @@ class PackageConvertWorker
       package + basename
     else
       basename
+    end
+  end
+
+  def update_jni
+    Dir.glob ("#@dest_dir/jni/*.c") do |file|
+      text = File.read(file)
+      original_method_name = "#@original_package".gsub(".","_")
+      new_method_name = "#@new_package_name".gsub(".","_")
+      text.gsub!("_Included_#{original_method_name}", "_Included_#{new_method_name}")
+      text.gsub!("Java_#{original_method_name}", "Java_#{new_method_name}")
+      File.open(file, 'w') { |f| f.write(text) }
     end
   end
 end

@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |gem|
   gem.name          = "package_converter"
-  gem.version       = 0.1
+  gem.version       = 0.2
   gem.summary = %q{helps you change the android package name}
   gem.authors       = ["Han Qin"]
   gem.email         = %w(hanhaify@gmail.com)
